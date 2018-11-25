@@ -16,12 +16,41 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path
 
+
 from blog import views
+
+from django.views.static import serve
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('^reg', views.register),                           # 注册
-    re_path('login', views.login),                             # 登陆
-    re_path('', views.index),                             # 主页
+    re_path('^check_username_exist/$', views.check_username_exist),     # 校验用户名是否已经被注册的接口
+    re_path('^login', views.login),                             # 登陆
+    re_path('^logout', views.logout),  # 注销
+    re_path('^index', views.index),                             # 主页
     re_path('^pc-geetest/register', views.get_geetest),      # 极验滑动验证码 获取验证码的url
+    # media相关的路由设置
+    re_path('^media/(?P<path>.*)$', serve, {"document_root": settings.MEDIA_ROOT}),
 ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

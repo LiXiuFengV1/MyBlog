@@ -20,8 +20,8 @@ class UserInfo(AbstractUser):
         return self.username
 
     class Meta:
-        verbose_name = "用户"
-        verbose_name_plural = verbose_name
+        verbose_name = "用户"                 # admin后台显示中文设置
+        verbose_name_plural = verbose_name      # 复数设置
 
 
 class Blog(models.Model):
@@ -156,7 +156,7 @@ class Comment(models.Model):
     user = models.ForeignKey(to="UserInfo", to_field="nid",on_delete=models.CASCADE)
     content = models.CharField(max_length=255)  # 评论内容
     create_time = models.DateTimeField(auto_now_add=True)
-    parent_comment = models.ForeignKey("self", null=True, blank=True,on_delete=models.CASCADE)  # blank=True 在django admin里面可以不填
+    parent_comment = models.ForeignKey("self", null=True, blank=True,on_delete=models.CASCADE)  # null=True 数据库可以为空； blank=True 在django admin里面可以不填
 
     def __str__(self):
         return self.content

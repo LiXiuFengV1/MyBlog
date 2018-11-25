@@ -11,7 +11,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <form novalidate action="/reg/" method="post" class="form-horizontal reg-form"
+            <form novalidate autocomplete="off" action="/reg/" method="post" class="form-horizontal reg-form"
                   enctype="multipart/form-data">
                 {% csrf_token %}
 
@@ -59,11 +59,6 @@
                         <input accept="image/*" type="file" name="avatar" id="id_avatar" style="display: none">
                         <span class="help-block"></span>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <!-- 放置极验的滑动验证码 -->
-                    <div id="popup-captcha"></div>
                 </div>
 
                 <div class="form-group">
@@ -133,8 +128,80 @@
     // 将所有的input框绑定获取焦点的事件，将所有的错误信息清空
     $("form input").focus(function () {
         $(this).next().text("").parent().parent().removeClass("has-error");
+    });
+
+    // 给username input 框绑定一个失去焦点的事件，失去焦点之后就校验用户名是否已经被注册
+    {#$("#id_username").blur(function () {#}
+    $("#id_username").on("input",function () {
+        //取到用户填写的值
+        var username = $(this).val();
+        //发请求
+        $.ajax({
+            url:"/check_username_exist/",
+            type:"get",
+            data:{"username":username},
+            success:function (data) {
+                if (data.status){
+                    // 用户名已经被注册
+                    $("#id_username").next().text(data.msg).parent().addClass("has-error");
+
+                }
+
+            }
+        })
     })
 </script>
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

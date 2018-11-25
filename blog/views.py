@@ -83,18 +83,23 @@ def get_geetest(request):
 # **************************** 使用极验滑动验证码的登录-结束 *************************
 
 
-def index(request):
-    return render(request, "index.html")
-
-
 # 用户注册的视图函数
 def register(request):
     if request.method == "POST":
         ret = {"status": 0, "msg": ""}
         form_obj = forms.RegForm(request.POST)
         print(request.POST)
+        print(1238888888888888888888888888888888888888888888888888888888888888888)
         # 帮我做校验
         if form_obj.is_valid():
+            username = form_obj.cleaned_data.get("username")
+            is_exist = models.UserInfo.objects.filter(username=username)
+            if is_exist:
+                # 表示用户名已经注册
+                ret["status"] = 1
+                ret["msg"] = "用户名已经存在！"
+                return JsonResponse(ret)
+
             # 校验通过，去数据库创建一个新的用户
             form_obj.cleaned_data.pop("re_password")
             avatar_img = request.FILES.get("avatar")
@@ -114,3 +119,22 @@ def register(request):
     return render(request, "register.html", {"form_obj": form_obj})
 
 
+def check_username_exist(request):
+    ret = {"status": 0, "msg": ""}
+    username = request.GET.get("username")
+    is_exist = models.UserInfo.objects.filter(username=username)
+    if is_exist:
+        ret["status"] = 1
+        ret["msg"] = "用户名已被注册"
+        return JsonResponse(ret)
+
+
+def index(request):
+    # 查询所有的文章列表
+    article_list = models.Article.objects.all()
+    return render(request, "index.html",{"article_list":article_list})
+
+
+def logout(request):
+    auth.logout(request)
+    return redirect("/index/")
