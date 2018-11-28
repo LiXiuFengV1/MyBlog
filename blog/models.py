@@ -126,6 +126,9 @@ class Article2Tag(models.Model):
     article = models.ForeignKey(to="Article", to_field="nid",on_delete=models.CASCADE)
     tag = models.ForeignKey(to="Tag", to_field="nid",on_delete=models.CASCADE)
 
+    def __str__(self):
+        return "{}-{}".format(self.article.title, self.tag.title)
+
     class Meta:
         unique_together = (("article", "tag"),)
         verbose_name = "文章-标签"
