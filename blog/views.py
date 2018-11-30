@@ -211,5 +211,55 @@ def article_detail(request, username, pk):
     article_obj = models.Article.objects.filter(pk=pk).first()
 
     # category_list, tag_list, archive_list = get_left_menu(username)
+    comment_list = models.Comment.objects.filter(article_id=pk)
+    return render(request, "article_detail.html",
+                  {"username": username, "article": article_obj, "blog": blog, "comment_list": comment_list})
 
-    return render(request, "article_detail.html", {"username": username, "article": article_obj, "blog": blog,})
+
+import json
+from django.db.models import F
+from django.db import transaction
+
+
+def poll(request):
+    print(request.POST)
+    is_up = json.loads(request.POST.get('is_up'))
+    article_id = request.POST.get("article_id")
+    user_id = request.user.pk
+
+    res = {"state": True}
+    try:
+        with transaction.atomic():  # 添加事务
+            models.ArticleUpDown.objects.create(is_up=is_up, article_id=article_id, user_id=user_id)
+            if is_up:
+                models.Article.objects.filter(pk=article_id).update(up_count=F("up_count") + 1)
+            else:
+                models.Article.objects.filter(pk=article_id).update(down_count=F("down_count") + 1)
+
+    except Exception as e:
+        res["state"] = False
+        res["fisrt_action"] = models.ArticleUpDown.objects.filter(article_id=article_id, user_id=user_id).first().is_up
+    return JsonResponse(res)
+
+
+def comment(request):
+    article_id = request.POST.get("article_id")
+    content = request.POST.get("content")
+    pid = request.POST.get("pid")
+    user_id = request.user.pk
+    res = {"state": True}
+    print(pid)
+    with transaction.atomic():
+        if not pid:  # 提交根评论
+            obj = models.Comment.objects.create(user_id=user_id, article_id=article_id, content=content, )
+        else:  # 提交子评论
+            obj = models.Comment.objects.create(user_id=user_id, article_id=article_id, content=content,
+                                                parent_comment_id=pid)
+        models.Article.objects.filter(pk=article_id).update(comment_count=F("comment_count") + 1)
+
+    return JsonResponse(res)
+
+
+def test(request):
+    name = "yuan"
+    return render(request, 'bookstrap.html', locals())
